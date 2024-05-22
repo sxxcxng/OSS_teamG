@@ -26,13 +26,15 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     fighterX = 0
     missileXY = []
 
-    rock = pygame.image.load(random.choice(rockImage))
-    rockSize = rock.get_rect().size
+    # 첫 번째 운석 초기화
+    firstRock = pygame.image.load(random.choice(rockImage))
+    rockSize = firstRock.get_rect().size
     rockWidth, rockHeight = rockSize
     rockX = random.randrange(0, padWidth - rockWidth)
     rockY = 0
     rockSpeed = 2
 
+    rocks = [[firstRock, rockX, rockY, rockSpeed]]
     isShot = False
     shotCount = 0
     rockPassed = 0
@@ -64,44 +66,75 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
         elif x > padWidth - fighterWidth:
             x = padWidth - fighterWidth
 
-        if y < rockY + rockHeight:
-            if (rockX > x and rockX < x + fighterWidth) or (rockX + rockWidth > x and rockX + rockWidth < x + fighterWidth):
-                writeMessage(gamePad, '전투기 파괴!', gameOverSound)
-                onGame = False
+        for rock in rocks:
+            rockImg, rockX, rockY, rockSpeed = rock
+            if y < rockY + rockHeight:
+                if (rockX > x and rockX < x + fighterWidth) or (rockX + rockWidth > x and rockX + rockWidth < x + fighterWidth):
+                    writeMessage(gamePad, '전투기 파괴!', gameOverSound)
+                    onGame = False
 
         drawObject(gamePad, fighter, x, y)
 
         if len(missileXY) != 0:
             for i, bxy in enumerate(missileXY):
                 bxy[1] -= 10
-                if bxy[1] < rockY and rockX < bxy[0] < rockX + rockWidth:
-                    missileXY.remove(bxy)
-                    isShot = True
-                    shotCount += 1
-                    destroySound.play()
-                    rock = pygame.image.load(random.choice(rockImage))
-                    rockSize = rock.get_rect().size
-                    rockWidth, rockHeight = rockSize
-                    rockX = random.randrange(0, padWidth - rockWidth)
-                    rockY = -rockHeight
-                    rockSpeed += 0.02
+                for rock in rocks:
+                    rockImg, rockX, rockY, rockSpeed = rock
+                    if bxy[1] < rockY and rockX < bxy[0] < rockX + rockWidth:
+                        missileXY.remove(bxy)
+                        isShot = True
+                        shotCount += 1
+                        destroySound.play()
+                        rocks.remove(rock)
+                        newRock = pygame.image.load(random.choice(rockImage))
+                        rockSize = newRock.get_rect().size
+                        rockWidth, rockHeight = rockSize
+                        newRockX = random.randrange(0, padWidth - rockWidth)
+                        newRockY = -rockHeight
+                        newRockSpeed = rockSpeed + 0.02
+                        rocks.append([newRock, newRockX, newRockY, newRockSpeed])
+                        if shotCount >= 3:
+                            anotherNewRock = pygame.image.load(random.choice(rockImage))
+                            anotherRockSize = anotherNewRock.get_rect().size
+                            anotherRockWidth, anotherRockHeight = anotherRockSize
+                            anotherRockX = random.randrange(0, padWidth - anotherRockWidth)
+                            anotherRockY = -anotherRockHeight
+                            anotherRockSpeed = rockSpeed + 0.02
+                            rocks.append([anotherNewRock, anotherRockX, anotherRockY, anotherRockSpeed])
                 if bxy[1] <= 0:
                     missileXY.remove(bxy)
             for bx, by in missileXY:
                 drawObject(gamePad, missile, bx, by)
 
         writeScore(gamePad, shotCount)
-        rockY += rockSpeed
-        if rockY > padHeight:
-            rock = pygame.image.load(random.choice(rockImage))
-            rockSize = rock.get_rect().size
-            rockWidth, rockHeight = rockSize
-            rockX = random.randrange(0, padWidth - rockWidth)
-            rockY = 0
-            rockPassed += 1
+
+        for rock in rocks:
+            rock[2] += rock[3]  # rock[2] is rockY and rock[3] is rockSpeed
+            rockImg, rockX, rockY, rockSpeed = rock
+            if rockY > padHeight:
+                rocks.remove(rock)
+                newRock = pygame.image.load(random.choice(rockImage))
+                rockSize = newRock.get_rect().size
+                rockWidth, rockHeight = rockSize
+                newRockX = random.randrange(0, padWidth - rockWidth)
+                newRockY = 0
+                newRockSpeed = rockSpeed
+                rocks.append([newRock, newRockX, newRockY, newRockSpeed])
+                rockPassed += 1
+                if shotCount >= 3:
+                    anotherNewRock = pygame.image.load(random.choice(rockImage))
+                    anotherRockSize = anotherNewRock.get_rect().size
+                    anotherRockWidth, anotherRockHeight = anotherRockSize
+                    anotherRockX = random.randrange(0, padWidth - anotherRockWidth)
+                    anotherRockY = 0
+                    anotherRockSpeed = rockSpeed
+                    rocks.append([anotherNewRock, anotherRockX, anotherRockY, anotherRockSpeed])
 
         writePassed(gamePad, rockPassed)
-        drawObject(gamePad, rock, rockX, rockY)
+
+        for rock in rocks:
+            rockImg, rockX, rockY, rockSpeed = rock
+            drawObject(gamePad, rockImg, rockX, rockY)
 
         if rockPassed > 2:
             writeMessage(gamePad, '게임 오버!', gameOverSound)
