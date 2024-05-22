@@ -41,7 +41,8 @@ def main():
     background = pygame.image.load('background.png')
     
     # initGame 함수를 통해 필요한 리소스들을 로드합니다.
-    gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound = initGame()
+    (gamePad, background, fighter, missile, explosion, missileSound, 
+     gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem) = initGame()
     
     # 시작 페이지 표시
     draw_start_screen(gamePad, background)
@@ -55,7 +56,7 @@ def main():
     wait_for_start(gamePad, background)
     
     # 게임 시작
-    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound)
+    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem)
 
 if __name__ == "__main__":
     main()

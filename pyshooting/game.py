@@ -14,12 +14,30 @@ def initGame():
     fighter = pygame.image.load('fighter.png')
     missile = pygame.image.load('missile.png')
     explosion = pygame.image.load('explosion.png')
+    fullHeart = pygame.image.load('full_heart.png')
+    emptyHeart = pygame.image.load('empty_heart.png')
+    heartItem = pygame.image.load('full_heart.png')
     clock = pygame.time.Clock()
     missileSound, gameOverSound, destroySound = loadSounds()
     playMusic('music.wav')
-    return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound
+    return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem
 
-def runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound):
+def drawHearts(gamePad, hearts, fullHeart, emptyHeart):
+    heart_width = fullHeart.get_rect().width
+    heart_height = fullHeart.get_rect().height
+    for i in range(3):
+        if i < hearts:
+            drawObject(gamePad, fullHeart, 10 + i * (heart_width + 10), padHeight - heart_height - 10)
+        else:
+            drawObject(gamePad, emptyHeart, 10 + i * (heart_width + 10), padHeight - heart_height - 10)
+
+def gameOver(gamePad, gameOverSound):
+    writeMessage(gamePad, '게임 오버!', gameOverSound)
+    stopMusic()
+    pygame.quit()
+    sys.exit()
+
+def runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem):
     fighterSize = fighter.get_rect().size
     fighterWidth, fighterHeight = fighterSize
     x, y = padWidth * 0.45, padHeight * 0.9
@@ -32,6 +50,13 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     rockX = random.randrange(0, padWidth - rockWidth)
     rockY = 0
     rockSpeed = 2
+
+    heartItemX = random.randrange(0, padWidth)
+    heartItemY = 0
+    heartItemSpeed = 2
+    heartItemAppear = False
+
+    hearts = 3
 
     isShot = False
     shotCount = 0
@@ -64,12 +89,25 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
         elif x > padWidth - fighterWidth:
             x = padWidth - fighterWidth
 
-        if y < rockY + rockHeight:
-            if (rockX > x and rockX < x + fighterWidth) or (rockX + rockWidth > x and rockX + rockWidth < x + fighterWidth):
-                writeMessage(gamePad, '전투기 파괴!', gameOverSound)
-                onGame = False
+        fighterRect = pygame.Rect(x, y, fighterWidth, fighterHeight)
+        rockRect = pygame.Rect(rockX, rockY, rockWidth, rockHeight)
+
+        if fighterRect.colliderect(rockRect):
+            hearts -= 1
+            if hearts == 0:
+                gameOver(gamePad, gameOverSound)
+            else:
+                rock = pygame.image.load(random.choice(rockImage))
+                rockSize = rock.get_rect().size
+                rockWidth = rockSize[0]
+                rockHeight = rockSize[1]
+                rockX = random.randrange(0, padWidth - rockWidth)
+                rockY = 0
 
         drawObject(gamePad, fighter, x, y)
+
+        if rockPassed == 3 or hearts == 0:
+            gameOver(gamePad, gameOverSound)
 
         if len(missileXY) != 0:
             for i, bxy in enumerate(missileXY):
@@ -100,8 +138,27 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             rockY = 0
             rockPassed += 1
 
+        if not heartItemAppear:
+            if random.random() < 0.007:
+                heartItemX = random.randrange(0, padWidth - heartItem.get_rect().width)
+                heartItemY = 0
+                heartItemAppear = True
+
+        if heartItemAppear:
+            heartItemY += heartItemSpeed
+            drawObject(gamePad, heartItem, heartItemX, heartItemY)
+            if heartItemY > padHeight:
+                heartItemAppear = False
+            if (y < heartItemY + heartItem.get_rect().height and
+                ((heartItemX > x and heartItemX < x + fighterWidth) or
+                 (heartItemX + heartItem.get_rect().width > x and heartItemX + heartItem.get_rect().width < x + fighterWidth))):
+                if hearts < 3:
+                    hearts += 1
+                heartItemAppear = False
+
         writePassed(gamePad, rockPassed)
         drawObject(gamePad, rock, rockX, rockY)
+        drawHearts(gamePad, hearts, fullHeart, emptyHeart)
 
         if rockPassed > 2:
             writeMessage(gamePad, '게임 오버!', gameOverSound)
