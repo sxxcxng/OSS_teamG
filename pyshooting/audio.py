@@ -14,3 +14,6 @@ def playMusic(file):
 
 def stopMusic():
     pygame.mixer.music.stop()
+
+def isMusicPlaying():
+    return pygame.mixer.music.get_busy()
