@@ -51,6 +51,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     rockY = 0
     rockSpeed = 2
 
+    rock2 = None  # Second rock initialization
+
     heartItemX = random.randrange(0, padWidth)
     heartItemY = 0
     heartItemSpeed = 2
@@ -104,6 +106,15 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 rockX = random.randrange(0, padWidth - rockWidth)
                 rockY = 0
 
+        if rock2:
+            rock2Rect = pygame.Rect(rock2['x'], rock2['y'], rock2['width'], rock2['height'])
+            if fighterRect.colliderect(rock2Rect):
+                hearts -= 1
+                if hearts == 0:
+                    gameOver(gamePad, gameOverSound)
+                else:
+                    rock2 = None
+
         drawObject(gamePad, fighter, x, y)
 
         if rockPassed == 3 or hearts == 0:
@@ -123,6 +134,21 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     rockX = random.randrange(0, padWidth - rockWidth)
                     rockY = -rockHeight
                     rockSpeed += 0.02
+                    if shotCount >= 3 and not rock2:
+                        rock2 = {
+                            'image': pygame.image.load(random.choice(rockImage)),
+                            'width': rockWidth,
+                            'height': rockHeight,
+                            'x': random.randrange(0, padWidth - rockWidth),
+                            'y': -rockHeight,
+                            'speed': rockSpeed
+                        }
+                if rock2 and bxy[1] < rock2['y'] + rock2['height'] and rock2['x'] < bxy[0] < rock2['x'] + rock2['width']:
+                    missileXY.remove(bxy)
+                    isShot = True
+                    shotCount += 1
+                    destroySound.play()
+                    rock2 = None
                 if bxy[1] <= 0:
                     missileXY.remove(bxy)
             for bx, by in missileXY:
@@ -137,6 +163,12 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             rockX = random.randrange(0, padWidth - rockWidth)
             rockY = 0
             rockPassed += 1
+
+        if rock2:
+            rock2['y'] += rock2['speed']
+            if rock2['y'] > padHeight:
+                rock2 = None
+                rockPassed += 1
 
         if not heartItemAppear:
             if random.random() < 0.007:
@@ -158,6 +190,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
 
         writePassed(gamePad, rockPassed)
         drawObject(gamePad, rock, rockX, rockY)
+        if rock2:
+            drawObject(gamePad, rock2['image'], rock2['x'], rock2['y'])
         drawHearts(gamePad, hearts, fullHeart, emptyHeart)
 
         if rockPassed > 2:
