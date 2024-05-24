@@ -16,3 +16,5 @@ rockImage = [
 ]
 
 explosionSound = ['explosion01.wav', 'explosion02.wav', 'explosion03.wav', 'explosion04.wav']
+
+clearItemImage = 'clear_item.png'
