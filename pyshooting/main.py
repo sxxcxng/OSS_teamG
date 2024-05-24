@@ -56,7 +56,7 @@ def main():
     wait_for_start(gamePad, background)
     
     # 게임 시작
-    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem)
+    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem)
 
 if __name__ == "__main__":
     main()

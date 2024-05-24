@@ -52,7 +52,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     rockY = 0
     rockSpeed = 2
 
-    rock2 = None  # Second rock initialization
+    rock2 = None
 
     heartItemX = random.randrange(0, padWidth)
     heartItemY = 0
@@ -72,32 +72,6 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     onGame = True
 
     while onGame:
-
-        if not clearItemAppear:
-            if random.random() < 0.005:  # Adjust appearance probability as needed
-                clearItemX = random.randrange(0, padWidth - clearItem.get_rect().width)
-                clearItemY = 0
-                clearItemAppear = True
-
-        if clearItemAppear:
-            clearItemY += clearItemSpeed
-            drawObject(gamePad, clearItem, clearItemX, clearItemY)
-            if clearItemY > padHeight:
-                clearItemAppear = False
-            if (y < clearItemY + clearItem.get_rect().height and
-                ((clearItemX > x and clearItemX < x + fighterWidth) or
-                 (clearItemX + clearItem.get_rect().width > x and clearItemX + clearItem.get_rect().width < x + fighterWidth))):
-                clearItemAppear = False
-                # Clear all rocks on screen
-                rock = pygame.image.load(random.choice(rockImage))
-                rockSize = rock.get_rect().size
-                rockWidth, rockHeight = rockSize
-                rockX = random.randrange(0, padWidth - rockWidth)
-                rockY = -rockHeight
-                rockSpeed += 0.02
-                rock2 = None
-                rockPassed = 0
-                
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -153,10 +127,13 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             gameOver(gamePad, gameOverSound)
 
         if len(missileXY) != 0:
-            for i, bxy in enumerate(missileXY):
+            for bxy in missileXY[:]:
                 bxy[1] -= 10
                 if bxy[1] < rockY and rockX < bxy[0] < rockX + rockWidth:
-                    missileXY.remove(bxy)
+                    try:
+                        missileXY.remove(bxy)
+                    except ValueError:
+                        pass
                     isShot = True
                     shotCount += 1
                     destroySound.play()
@@ -176,15 +153,46 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                             'speed': rockSpeed
                         }
                 if rock2 and bxy[1] < rock2['y'] + rock2['height'] and rock2['x'] < bxy[0] < rock2['x'] + rock2['width']:
-                    missileXY.remove(bxy)
+                    try:
+                        missileXY.remove(bxy)
+                    except ValueError:
+                        pass
                     isShot = True
                     shotCount += 1
                     destroySound.play()
                     rock2 = None
                 if bxy[1] <= 0:
-                    missileXY.remove(bxy)
+                    try:
+                        missileXY.remove(bxy)
+                    except ValueError:
+                        pass
             for bx, by in missileXY:
                 drawObject(gamePad, missile, bx, by)
+
+        if not clearItemAppear:
+            if random.random() < 0.007:
+                clearItemX = random.randrange(0, padWidth - clearItem.get_rect().width)
+                clearItemY = 0
+                clearItemAppear = True
+
+        if clearItemAppear:
+            clearItemY += clearItemSpeed
+            drawObject(gamePad, clearItem, clearItemX, clearItemY)
+            if clearItemY > padHeight:
+                clearItemAppear = False
+            if (y < clearItemY + clearItem.get_rect().height and
+                ((clearItemX > x and clearItemX < x + fighterWidth) or
+                 (clearItemX + clearItem.get_rect().width > x and clearItemX + clearItem.get_rect().width < x + fighterWidth))):
+                clearItemAppear = False
+                rock = pygame.image.load(random.choice(rockImage))
+                rockSize = rock.get_rect().size
+                rockWidth = rockSize[0]
+                rockHeight = rockSize[1]
+                rockX = random.randrange(0, padWidth - rockWidth)
+                rockY = -rockHeight
+                rockSpeed += 0.02
+                rock2 = None
+                rockPassed = 0
 
         writeScore(gamePad, shotCount)
         rockY += rockSpeed
