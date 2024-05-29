@@ -23,6 +23,8 @@ def initGame():
     playMusic('music.wav')
     return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem
 
+
+
 def drawHearts(gamePad, hearts, fullHeart, emptyHeart):
     heart_width = fullHeart.get_rect().width
     heart_height = fullHeart.get_rect().height
@@ -45,12 +47,17 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     fighterX = 0
     missileXY = []
 
+    rockSpeeds = [2,3,4] 
+    current_rock_speed_index = 0 
+
     rock = pygame.image.load(random.choice(rockImage))
     rockSize = rock.get_rect().size
     rockWidth, rockHeight = rockSize
     rockX = random.randrange(0, padWidth - rockWidth)
     rockY = 0
-    rockSpeed = 2
+    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1) 
+    rockSpeed = rockSpeeds[current_rock_speed_index] 
+    
 
     rock2 = None
 
@@ -142,6 +149,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     rockWidth, rockHeight = rockSize
                     rockX = random.randrange(0, padWidth - rockWidth)
                     rockY = -rockHeight
+                    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1) 
+                    rockSpeed = rockSpeeds[current_rock_speed_index]  
                     rockSpeed += 0.02
                     if shotCount >= 3 and not rock2:
                         rock2 = {
@@ -203,6 +212,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             rockX = random.randrange(0, padWidth - rockWidth)
             rockY = 0
             rockPassed += 1
+            current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1) 
+            rockSpeed = rockSpeeds[current_rock_speed_index] 
 
         if rock2:
             rock2['y'] += rock2['speed']
