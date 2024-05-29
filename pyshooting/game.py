@@ -24,7 +24,6 @@ def initGame():
     return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem
 
 
-
 def drawHearts(gamePad, hearts, fullHeart, emptyHeart):
     heart_width = fullHeart.get_rect().width
     heart_height = fullHeart.get_rect().height
@@ -47,17 +46,16 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     fighterX = 0
     missileXY = []
 
-    rockSpeeds = [2,3,4] 
-    current_rock_speed_index = 0 
+    rockSpeeds = [2, 3, 4]
+    current_rock_speed_index = 0
 
     rock = pygame.image.load(random.choice(rockImage))
     rockSize = rock.get_rect().size
     rockWidth, rockHeight = rockSize
     rockX = random.randrange(0, padWidth - rockWidth)
     rockY = 0
-    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1) 
-    rockSpeed = rockSpeeds[current_rock_speed_index] 
-    
+    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
+    rockSpeed = rockSpeeds[current_rock_speed_index]
 
     rock2 = None
 
@@ -149,8 +147,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     rockWidth, rockHeight = rockSize
                     rockX = random.randrange(0, padWidth - rockWidth)
                     rockY = -rockHeight
-                    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1) 
-                    rockSpeed = rockSpeeds[current_rock_speed_index]  
+                    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
+                    rockSpeed = rockSpeeds[current_rock_speed_index]
                     rockSpeed += 0.02
                     if shotCount >= 3 and not rock2:
                         rock2 = {
@@ -159,7 +157,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                             'height': rockHeight,
                             'x': random.randrange(0, padWidth - rockWidth),
                             'y': -rockHeight,
-                            'speed': rockSpeed
+                            'speed': rockSpeed,
+                            'xSpeed': random.choice([-2, 2])
                         }
                 if rock2 and bxy[1] < rock2['y'] + rock2['height'] and rock2['x'] < bxy[0] < rock2['x'] + rock2['width']:
                     try:
@@ -212,11 +211,14 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             rockX = random.randrange(0, padWidth - rockWidth)
             rockY = 0
             rockPassed += 1
-            current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1) 
-            rockSpeed = rockSpeeds[current_rock_speed_index] 
+            current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
+            rockSpeed = rockSpeeds[current_rock_speed_index]
 
         if rock2:
             rock2['y'] += rock2['speed']
+            rock2['x'] += rock2['xSpeed']
+            if rock2['x'] < 0 or rock2['x'] > padWidth - rock2['width']:
+                rock2['xSpeed'] = -rock2['xSpeed']
             if rock2['y'] > padHeight:
                 rock2 = None
                 rockPassed += 1
