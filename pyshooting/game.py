@@ -2,7 +2,7 @@ import pygame
 import sys
 import random
 from pyshooting.resources import padWidth, padHeight, rockImage, explosionSound
-from pyshooting.graphics import drawObject, writeScore, writePassed
+from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
 from pyshooting.messages import writeMessage
 from pyshooting.audio import loadSounds, playMusic, stopMusic
 
@@ -23,6 +23,14 @@ def initGame():
     playMusic('music.wav')
     return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem
 
+def showLevelPage(gamePad, level):
+    font = pygame.font.Font('NanumGothic.ttf', 80)
+    text = font.render(f'레벨 {level}', True, (255, 255, 255))
+    textpos = text.get_rect(center=(padWidth / 2, padHeight / 2))
+    gamePad.fill((0, 0, 0))
+    gamePad.blit(text, textpos)
+    pygame.display.update()
+    pygame.time.delay(2000)
 
 def drawHearts(gamePad, hearts, fullHeart, emptyHeart):
     heart_width = fullHeart.get_rect().width
@@ -75,6 +83,10 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     shotCount = 0
     rockPassed = 0
     onGame = True
+    level = 1
+    rocks_destroyed = 0
+
+    showLevelPage(gamePad, level)
 
     while onGame:
         for event in pygame.event.get():
@@ -141,6 +153,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                         pass
                     isShot = True
                     shotCount += 1
+                    rocks_destroyed += 1
                     destroySound.play()
                     rock = pygame.image.load(random.choice(rockImage))
                     rockSize = rock.get_rect().size
@@ -167,6 +180,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                         pass
                     isShot = True
                     shotCount += 1
+                    rocks_destroyed += 1
                     destroySound.play()
                     rock2 = None
                 if bxy[1] <= 0:
@@ -202,7 +216,14 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 rock2 = None
                 rockPassed = 0
 
+        if rocks_destroyed >= 4 * level:
+            level += 1
+            showLevelPage(gamePad, level)
+            rocks_destroyed = 0
+            rockSpeed += 0.5
+
         writeScore(gamePad, shotCount)
+        writeLevel(gamePad, level, padWidth, padHeight)
         rockY += rockSpeed
         if rockY > padHeight:
             rock = pygame.image.load(random.choice(rockImage))
