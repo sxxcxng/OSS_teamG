@@ -5,23 +5,28 @@ from pyshooting.resources import padWidth, padHeight, rockImage, explosionSound
 from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
 from pyshooting.messages import writeMessage
 from pyshooting.audio import loadSounds, playMusic, stopMusic
+import os
 
 def initGame():
     pygame.init()
     gamePad = pygame.display.set_mode((padWidth, padHeight))
     pygame.display.set_caption('PyShooting')
-    background = pygame.image.load('background.png')
-    fighter = pygame.image.load('fighter.png')
-    missile = pygame.image.load('missile.png')
-    explosion = pygame.image.load('explosion.png')
-    fullHeart = pygame.image.load('full_heart.png')
-    emptyHeart = pygame.image.load('empty_heart.png')
-    heartItem = pygame.image.load('full_heart.png')
-    clearItem = pygame.image.load('clear_item.png')
-    missileItem = pygame.image.load('missile_item.png')
+
+    # 모든 이미지 파일을 assets/images 폴더에서 로드
+    imageDir = 'assets/images'
+    background = pygame.image.load(os.path.join(imageDir, 'background.png'))
+    fighter = pygame.image.load(os.path.join(imageDir, 'fighter.png'))
+    missile = pygame.image.load(os.path.join(imageDir, 'missile.png'))
+    explosion = pygame.image.load(os.path.join(imageDir, 'explosion.png'))
+    fullHeart = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
+    emptyHeart = pygame.image.load(os.path.join(imageDir, 'empty_heart.png'))
+    heartItem = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
+    clearItem = pygame.image.load(os.path.join(imageDir, 'clear_item.png'))
+    missileItem = pygame.image.load(os.path.join(imageDir, 'missile_item.png'))
     clock = pygame.time.Clock()
     missileSound, gameOverSound, destroySound = loadSounds()
-    playMusic('music.wav')
+    playMusic(os.path.join('assets/sounds', 'music.wav'))
+    
     return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem
 
 def showLevelPage(gamePad, level):

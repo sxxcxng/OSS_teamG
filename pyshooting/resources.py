@@ -1,4 +1,5 @@
 import pygame
+import os
 
 pygame.font.init()
 pygame.mixer.init()
@@ -6,15 +7,24 @@ pygame.mixer.init()
 padWidth = 480
 padHeight = 640
 
-rockImage = [
-    'rock01.png', 'rock02.png', 'rock03.png', 'rock04.png', 'rock05.png',
-    'rock06.png', 'rock07.png', 'rock08.png', 'rock09.png', 'rock10.png',
-    'rock11.png', 'rock12.png', 'rock13.png', 'rock14.png', 'rock15.png',
-    'rock16.png', 'rock17.png', 'rock18.png', 'rock19.png', 'rock20.png',
-    'rock21.png', 'rock22.png', 'rock23.png', 'rock24.png', 'rock25.png',
-    'rock26.png', 'rock27.png', 'rock28.png', 'rock29.png', 'rock30.png'
-]
+# 이미지와 사운드가 있는 디렉토리 경로 설정
+rockImageDir = 'assets/images'
+explosionSoundDir = 'assets/sounds'
 
-explosionSound = ['explosion01.wav', 'explosion02.wav', 'explosion03.wav', 'explosion04.wav']
+# 운석 이미지 파일 이름을 담을 리스트
+rockImage = []
 
+# 'rock'으로 시작하는 파일 이름을 찾아 리스트에 추가
+for filename in os.listdir(rockImageDir):
+    if filename.startswith('rock') and filename.endswith('.png'):
+        rockImage.append(os.path.join(rockImageDir, filename))
+
+# 폭발 사운드 파일 이름을 담을 리스트
+explosionSound = []
+
+# 'explosion'으로 시작하는 파일 이름을 찾아 리스트에 추가
+for filename in os.listdir(explosionSoundDir):
+    if filename.startswith('explosion') and filename.endswith('.wav'):
+        explosionSound.append(os.path.join(explosionSoundDir, filename))
+        
 clearItemImage = 'clear_item.png'

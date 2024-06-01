@@ -2,6 +2,7 @@ import pygame
 import sys
 from pyshooting.resources import padWidth, padHeight
 from pyshooting.audio import playMusic, stopMusic, isMusicPlaying
+import os
 
 def draw_settings_screen(gamePad):
     gamePad.fill((0, 0, 0))
@@ -10,7 +11,7 @@ def draw_settings_screen(gamePad):
     text_rect = text.get_rect(center=(padWidth / 2, padHeight / 2 - 150))
     gamePad.blit(text, text_rect)
 
-    back_text = font.render('뒤로가기', True, (255, 255, 255))
+    back_text = font.render('저장', True, (255, 255, 255))
     back_text_rect = back_text.get_rect(center=(padWidth / 2, padHeight / 2 + 150))
     gamePad.blit(back_text, back_text_rect)
 
@@ -22,7 +23,6 @@ def draw_settings_screen(gamePad):
     pygame.display.update()
 
 def wait_for_back(gamePad):
-    global back_button, music_button
     back_button = pygame.Rect(padWidth / 2 - 100, padHeight / 2 + 100, 200, 100)
     music_button = pygame.Rect(padWidth / 2 - 100, padHeight / 2 - 50, 200, 100)
     waiting = True
@@ -31,7 +31,7 @@ def wait_for_back(gamePad):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = event.pos
                 if back_button.collidepoint(mouse_x, mouse_y):
                     waiting = False
@@ -39,8 +39,9 @@ def wait_for_back(gamePad):
                     if isMusicPlaying():
                         stopMusic()
                     else:
-                        playMusic('music.wav')
+                        playMusic(os.path.join('assets/sounds', 'music.wav'))
                     draw_settings_screen(gamePad)
+        pygame.display.update()
 
 def run_settings(gamePad):
     draw_settings_screen(gamePad)
