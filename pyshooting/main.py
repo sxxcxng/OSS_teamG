@@ -3,6 +3,7 @@ import sys
 from pyshooting.resources import padWidth, padHeight
 from pyshooting.game import runGame, initGame
 import pyshooting.settingTab as settingTab
+import os
 
 def draw_start_screen(gamePad, background):
     gamePad.blit(background, (0, 0))
@@ -38,7 +39,8 @@ def main():
     gamePad = pygame.display.set_mode((padWidth, padHeight))
     pygame.display.set_caption('PyShooting')
     
-    background = pygame.image.load('background.png')
+    imageDir = 'assets/images'
+    background = pygame.image.load(os.path.join(imageDir, 'background.png'))
     
     # initGame 함수를 통해 필요한 리소스들을 로드합니다.
     (gamePad, background, fighter, missile, explosion, missileSound, 
