@@ -18,10 +18,11 @@ def initGame():
     emptyHeart = pygame.image.load('empty_heart.png')
     heartItem = pygame.image.load('full_heart.png')
     clearItem = pygame.image.load('clear_item.png')
+    missileItem = pygame.image.load('missile_item.png')
     clock = pygame.time.Clock()
     missileSound, gameOverSound, destroySound = loadSounds()
     playMusic('music.wav')
-    return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem
+    return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem
 
 def showLevelPage(gamePad, level):
     font = pygame.font.Font('NanumGothic.ttf', 80)
@@ -47,7 +48,7 @@ def gameOver(gamePad, gameOverSound):
     pygame.quit()
     sys.exit()
 
-def runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem):
+def runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem):
     fighterSize = fighter.get_rect().size
     fighterWidth, fighterHeight = fighterSize
     x, y = padWidth * 0.45, padHeight * 0.9
@@ -64,13 +65,19 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     rockY = 0
     current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
     rockSpeed = rockSpeeds[current_rock_speed_index]
-
     rock2 = None
 
     heartItemX = random.randrange(0, padWidth)
     heartItemY = 0
     heartItemSpeed = 2
     heartItemAppear = False
+
+    missileItemX = random.randrange(0, padWidth)
+    missileItemY = 0
+    missileItemSpeed = 3
+    missileItemAppear = False
+    missileEnhanced = False
+    missileEnhanceEndTime = 0
 
     hearts = 3
 
@@ -103,6 +110,8 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     missileX = x + fighterWidth / 2
                     missileY = y - fighterHeight
                     missileXY.append([missileX, missileY])
+                    if missileEnhanced:
+                        missileXY.append([missileX - 20, missileY])
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     fighterX = 0
@@ -261,6 +270,27 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 if hearts < 3:
                     hearts += 1
                 heartItemAppear = False
+
+        if not missileItemAppear:
+            if random.random() < 0.002:
+                missileItemX = random.randrange(0, padWidth - missileItem.get_rect().width)
+                missileItemY = 0
+                missileItemAppear = True
+
+        if missileItemAppear:
+            missileItemY += missileItemSpeed
+            drawObject(gamePad, missileItem, missileItemX, missileItemY)
+            if missileItemY > padHeight:
+                missileItemAppear = False
+            if (y < missileItemY + missileItem.get_rect().height and
+                ((missileItemX > x and missileItemX < x + fighterWidth) or
+                 (missileItemX + missileItem.get_rect().width > x and missileItemX + missileItem.get_rect().width < x + fighterWidth))):
+                missileItemAppear = False
+                missileEnhanced = True
+                missileEnhanceEndTime = pygame.time.get_ticks() + 5000  # 5초 동안 미사일 발사 개수 증가
+
+        if missileEnhanced and pygame.time.get_ticks() > missileEnhanceEndTime:
+            missileEnhanced = False
 
         writePassed(gamePad, rockPassed)
         drawObject(gamePad, rock, rockX, rockY)

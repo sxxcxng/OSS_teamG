@@ -42,7 +42,7 @@ def main():
     
     # initGame 함수를 통해 필요한 리소스들을 로드합니다.
     (gamePad, background, fighter, missile, explosion, missileSound, 
-     gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem) = initGame()
+     gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem) = initGame()
     
     # 시작 페이지 표시
     draw_start_screen(gamePad, background)
@@ -56,7 +56,7 @@ def main():
     wait_for_start(gamePad, background)
     
     # 게임 시작
-    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem)
+    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem)
 
 if __name__ == "__main__":
     main()
