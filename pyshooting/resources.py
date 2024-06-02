@@ -28,3 +28,19 @@ for filename in os.listdir(explosionSoundDir):
         explosionSound.append(os.path.join(explosionSoundDir, filename))
         
 clearItemImage = 'clear_item.png'
+
+# 이미지 로드 함수
+def load_image(file_path):
+    try:
+        return pygame.image.load(file_path)
+    except FileNotFoundError:
+        print(f"Error: Image file {file_path} not found.")
+        return None
+
+# 사운드 로드 함수
+def load_sound(file_path):
+    try:
+        return pygame.mixer.Sound(file_path)
+    except FileNotFoundError:
+        print(f"Error: Sound file {file_path} not found.")
+        return None
