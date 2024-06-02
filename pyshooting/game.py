@@ -6,6 +6,7 @@ from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
 from pyshooting.messages import writeMessage
 from pyshooting.audio import loadSounds, playMusic, stopMusic
 import os
+import time
 
 class Rock:
     def __init__(self, image, width, height, x, y, speed, x_speed=0):
@@ -126,6 +127,9 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     level = 1
     rocks_destroyed = 0
 
+    last_pause_time = time.time()
+    is_paused = False
+
     showLevelPage(gamePad, level)
 
     while onGame:
@@ -145,9 +149,20 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     missileXY.append([missileX, missileY])
                     if missileEnhanced:
                         missileXY.append([missileX - 20, missileY])
+                elif event.key == pygame.K_p:
+                    if time.time() - last_pause_time > 0.5:  # Debounce for 0.5 seconds
+                        is_paused = not is_paused
+                        if is_paused:
+                            stopMusic()
+                        else:
+                            playMusic(os.path.join('assets/sounds', 'music.wav'))
+                        last_pause_time = time.time()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     fighterX = 0
+
+        if is_paused:
+            continue
 
         gamePad.blit(background, (0, 0))
         x += fighterX
@@ -183,7 +198,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
         if len(missileXY) != 0:
             for bxy in missileXY[:]:
                 bxy[1] -= 10
-                if bxy[1] < rock.y and rock.x < bxy[0] < rock.x + rock.width:
+                if pixel_collision(rock.image, missile, rock.x, rock.y, bxy[0], bxy[1]):
                     try:
                         missileXY.remove(bxy)
                     except ValueError:
@@ -195,7 +210,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     rock.reset()
                     if shotCount >= 3 and not rock2:
                         rock2 = Rock(random.choice(rockImage), rock.width, rock.height, random.randrange(0, padWidth - rock.width), -rock.height, rock.speed, random.choice([-2, 2]))
-                if rock2 and bxy[1] < rock2.y + rock2.height and rock2.x < bxy[0] < rock2.x + rock2.width:
+                if rock2 and pixel_collision(rock2.image, missile, rock2.x, rock2.y, bxy[0], bxy[1]):
                     try:
                         missileXY.remove(bxy)
                     except ValueError:
@@ -226,7 +241,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 clearItemAppear = False
             if (y < clearItemY + clearItem.get_rect().height and
                 ((clearItemX > x and clearItemX < x + fighterWidth) or
-                 (clearItemX + clearItem.get_rect().width > x and clearItemX + clearItem.get_rect().width < x + fighterWidth))):
+                 (clearItemX + clearItem.get_rect().width > x and clearItem.get_rect().width < x + fighterWidth))):
                 clearItemAppear = False
                 rock.reset()
                 rock2 = None
@@ -320,4 +335,3 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
 
     pygame.quit()
     sys.exit()
-    
