@@ -88,47 +88,26 @@ def pixel_collision(obj1, obj2, obj1_x, obj1_y, obj2_x, obj2_y):
     return True
 
 def runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem):
-    fighterSize = fighter.get_rect().size
-    fighterWidth, fighterHeight = fighterSize
+    fighterWidth, fighterHeight = fighter.get_rect().size
     x, y = padWidth * 0.45, padHeight * 0.9
     fighterX = 0
     missileXY = []
 
-    rockSpeeds = [2, 3, 4]
-    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
-    rockSpeed = rockSpeeds[current_rock_speed_index]
-
+    rockSpeed = random.choice([2, 3, 4])
     rock = Rock(random.choice(rockImage), 0, 0, random.randrange(0, padWidth), 0, rockSpeed)
     rock2 = None
 
-    heartItemX = random.randrange(0, padWidth)
-    heartItemY = 0
-    heartItemSpeed = 2
-    heartItemAppear = False
+    heartItemX, heartItemY, heartItemSpeed, heartItemAppear = random.randrange(0, padWidth), 0, 2, False
 
-    missileItemX = random.randrange(0, padWidth)
-    missileItemY = 0
-    missileItemSpeed = 3
-    missileItemAppear = False
-    missileEnhanced = False
-    missileEnhanceEndTime = 0
+    missileItemX, missileItemY, missileItemSpeed, missileItemAppear, missileEnhanced, missileEnhanceEndTime = random.randrange(0, padWidth), 0, 3, False, False, 0
 
-    hearts = 3
+    clearItemX, clearItemY, clearItemSpeed, clearItemAppear = random.randrange(0, padWidth), 0, 3, False
 
-    clearItemX = random.randrange(0, padWidth)
-    clearItemY = 0
-    clearItemSpeed = 3
-    clearItemAppear = False
+    hearts, rocks_destroyed = 3, 0
 
-    isShot = False
-    shotCount = 0
-    rockPassed = 0
-    onGame = True
-    level = 1
-    rocks_destroyed = 0
+    isShot, shotCount, rockPassed, onGame, level = False, 0, 0, True, 1
 
-    last_pause_time = time.time()
-    is_paused = False
+    last_pause_time, is_paused = time.time(), False
 
     showLevelPage(gamePad, level)
 
