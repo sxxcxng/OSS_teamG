@@ -1,34 +1,58 @@
 import pygame
 import sys
 import random
-from pyshooting.resources import padWidth, padHeight, rockImage, load_image, load_sound
+from pyshooting.resources import padWidth, padHeight, rockImage, explosionSound
 from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
 from pyshooting.messages import writeMessage
 from pyshooting.audio import loadSounds, playMusic, stopMusic
 import os
 import time
 
+class Rock:
+    def __init__(self, image, width, height, x, y, speed, x_speed=0):
+        self.image = pygame.image.load(image)
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.x_speed = x_speed
+
+    def draw(self, gamePad):
+        drawObject(gamePad, self.image, self.x, self.y)
+
+    def move(self):
+        self.y += self.speed
+        self.x += self.x_speed
+        if self.x < 0 or self.x > padWidth - self.width:
+            self.x_speed = -self.x_speed
+
+    def reset(self):
+        self.image = pygame.image.load(random.choice(rockImage))
+        rockSize = self.image.get_rect().size
+        self.width = rockSize[0]
+        self.height = rockSize[1]
+        self.x = random.randrange(0, padWidth - self.width)
+        self.y = -self.height
+        self.speed += 0.02
+
 def initGame():
     pygame.init()
     gamePad = pygame.display.set_mode((padWidth, padHeight))
     pygame.display.set_caption('PyShooting')
-
-    # 모든 이미지 파일을 assets/images 폴더에서 로드
     imageDir = 'assets/images'
-    background = load_image(os.path.join(imageDir, 'background.png'))
-    fighter = load_image(os.path.join(imageDir, 'fighter.png'))
-    missile = load_image(os.path.join(imageDir, 'missile.png'))
-    explosion = load_image(os.path.join(imageDir, 'explosion.png'))
-    fullHeart = load_image(os.path.join(imageDir, 'full_heart.png'))
-    emptyHeart = load_image(os.path.join(imageDir, 'empty_heart.png'))
-    heartItem = load_image(os.path.join(imageDir, 'full_heart.png'))
-    clearItem = load_image(os.path.join(imageDir, 'clear_item.png'))
-    missileItem = load_image(os.path.join(imageDir, 'missile_item.png'))
-
+    background = pygame.image.load(os.path.join(imageDir, 'background.png'))
+    fighter = pygame.image.load(os.path.join(imageDir, 'fighter.png'))
+    missile = pygame.image.load(os.path.join(imageDir, 'missile.png'))
+    explosion = pygame.image.load(os.path.join(imageDir, 'explosion.png'))
+    fullHeart = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
+    emptyHeart = pygame.image.load(os.path.join(imageDir, 'empty_heart.png'))
+    heartItem = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
+    clearItem = pygame.image.load(os.path.join(imageDir, 'clear_item.png'))
+    missileItem = pygame.image.load(os.path.join(imageDir, 'missile_item.png'))
     clock = pygame.time.Clock()
     missileSound, gameOverSound, destroySound = loadSounds()
     playMusic(os.path.join('assets/sounds', 'music.wav'))
-    
     return gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem
 
 def showLevelPage(gamePad, level):
@@ -71,15 +95,10 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     missileXY = []
 
     rockSpeeds = [2, 3, 4]
-    current_rock_speed_index = 0
-
-    rock = pygame.image.load(random.choice(rockImage))
-    rockSize = rock.get_rect().size
-    rockWidth, rockHeight = rockSize
-    rockX = random.randrange(0, padWidth - rockWidth)
-    rockY = 0
     current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
     rockSpeed = rockSpeeds[current_rock_speed_index]
+
+    rock = Rock(random.choice(rockImage), 0, 0, random.randrange(0, padWidth), 0, rockSpeed)
     rock2 = None
 
     heartItemX = random.randrange(0, padWidth)
@@ -131,7 +150,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     if missileEnhanced:
                         missileXY.append([missileX - 20, missileY])
                 elif event.key == pygame.K_p:
-                    if time.time() - last_pause_time > 30:
+                    if time.time() - last_pause_time > 0.5:  # Debounce for 0.5 seconds
                         is_paused = not is_paused
                         if is_paused:
                             stopMusic()
@@ -153,22 +172,17 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             x = padWidth - fighterWidth
 
         fighterRect = pygame.Rect(x, y, fighterWidth, fighterHeight)
-        rockRect = pygame.Rect(rockX, rockY, rockWidth, rockHeight)
+        rockRect = pygame.Rect(rock.x, rock.y, rock.width, rock.height)
 
         if fighterRect.colliderect(rockRect):
             hearts -= 1
             if hearts == 0:
                 gameOver(gamePad, gameOverSound)
             else:
-                rock = pygame.image.load(random.choice(rockImage))
-                rockSize = rock.get_rect().size
-                rockWidth = rockSize[0]
-                rockHeight = rockSize[1]
-                rockX = random.randrange(0, padWidth - rockWidth)
-                rockY = 0
+                rock.reset()
 
         if rock2:
-            rock2Rect = pygame.Rect(rock2['x'], rock2['y'], rock2['width'], rock2['height'])
+            rock2Rect = pygame.Rect(rock2.x, rock2.y, rock2.width, rock2.height)
             if fighterRect.colliderect(rock2Rect):
                 hearts -= 1
                 if hearts == 0:
@@ -184,7 +198,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
         if len(missileXY) != 0:
             for bxy in missileXY[:]:
                 bxy[1] -= 10
-                if bxy[1] < rockY and rockX < bxy[0] < rockX + rockWidth:
+                if pixel_collision(rock.image, missile, rock.x, rock.y, bxy[0], bxy[1]):
                     try:
                         missileXY.remove(bxy)
                     except ValueError:
@@ -193,25 +207,10 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     shotCount += 1
                     rocks_destroyed += 1
                     destroySound.play()
-                    rock = pygame.image.load(random.choice(rockImage))
-                    rockSize = rock.get_rect().size
-                    rockWidth, rockHeight = rockSize
-                    rockX = random.randrange(0, padWidth - rockWidth)
-                    rockY = -rockHeight
-                    current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
-                    rockSpeed = rockSpeeds[current_rock_speed_index]
-                    rockSpeed += 0.02
+                    rock.reset()
                     if shotCount >= 3 and not rock2:
-                        rock2 = {
-                            'image': pygame.image.load(random.choice(rockImage)),
-                            'width': rockWidth,
-                            'height': rockHeight,
-                            'x': random.randrange(0, padWidth - rockWidth),
-                            'y': -rockHeight,
-                            'speed': rockSpeed,
-                            'xSpeed': random.choice([-2, 2])
-                        }
-                if rock2 and bxy[1] < rock2['y'] + rock2['height'] and rock2['x'] < bxy[0] < rock2['x'] + rock2['width']:
+                        rock2 = Rock(random.choice(rockImage), rock.width, rock.height, random.randrange(0, padWidth - rock.width), -rock.height, rock.speed, random.choice([-2, 2]))
+                if rock2 and pixel_collision(rock2.image, missile, rock2.x, rock2.y, bxy[0], bxy[1]):
                     try:
                         missileXY.remove(bxy)
                     except ValueError:
@@ -242,15 +241,9 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 clearItemAppear = False
             if (y < clearItemY + clearItem.get_rect().height and
                 ((clearItemX > x and clearItemX < x + fighterWidth) or
-                 (clearItemX + clearItem.get_rect().width > x and clearItemX + clearItem.get_rect().width < x + fighterWidth))):
+                 (clearItemX + clearItem.get_rect().width > x and clearItem.get_rect().width < x + fighterWidth))):
                 clearItemAppear = False
-                rock = pygame.image.load(random.choice(rockImage))
-                rockSize = rock.get_rect().size
-                rockWidth = rockSize[0]
-                rockHeight = rockSize[1]
-                rockX = random.randrange(0, padWidth - rockWidth)
-                rockY = -rockHeight
-                rockSpeed += 0.02
+                rock.reset()
                 rock2 = None
                 rockPassed = 0
 
@@ -258,27 +251,18 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             level += 1
             showLevelPage(gamePad, level)
             rocks_destroyed = 0
-            rockSpeed += 0.5
+            rock.speed += 0.5
 
         writeScore(gamePad, shotCount)
         writeLevel(gamePad, level, padWidth, padHeight)
-        rockY += rockSpeed
-        if rockY > padHeight:
-            rock = pygame.image.load(random.choice(rockImage))
-            rockSize = rock.get_rect().size
-            rockWidth, rockHeight = rockSize
-            rockX = random.randrange(0, padWidth - rockWidth)
-            rockY = 0
+        rock.move()
+        if rock.y > padHeight:
+            rock.reset()
             rockPassed += 1
-            current_rock_speed_index = random.randint(0, len(rockSpeeds) - 1)
-            rockSpeed = rockSpeeds[current_rock_speed_index]
 
         if rock2:
-            rock2['y'] += rock2['speed']
-            rock2['x'] += rock2['xSpeed']
-            if rock2['x'] < 0 or rock2['x'] > padWidth - rock2['width']:
-                rock2['xSpeed'] = -rock2['xSpeed']
-            if rock2['y'] > padHeight:
+            rock2.move()
+            if rock2.y > padHeight:
                 rock2 = None
                 rockPassed += 1
 
@@ -295,7 +279,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 heartItemAppear = False
             if (y < heartItemY + heartItem.get_rect().height and
                 ((heartItemX > x and heartItemX < x + fighterWidth) or
-                 (heartItemX + heartItem.get_rect().width > x and heartItemX + heartItem.get_rect().width < x + fighterWidth))):
+                 (heartItemX + heartItem.get_rect().width > x and heartItem.get_rect().width < x + fighterWidth))):
                 if hearts < 3:
                     hearts += 1
                 heartItemAppear = False
@@ -313,44 +297,38 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                 missileItemAppear = False
             if (y < missileItemY + missileItem.get_rect().height and
                 ((missileItemX > x and missileItemX < x + fighterWidth) or
-                 (missileItemX + missileItem.get_rect().width > x and missileItemX + missileItem.get_rect().width < x + fighterWidth))):
+                 (missileItemX + missileItem.get_rect().width > x and missileItem.get_rect().width < x + fighterWidth))):
                 missileItemAppear = False
                 missileEnhanced = True
-                missileEnhanceEndTime = pygame.time.get_ticks() + 5000  # 5초 동안 미사일 발사 개수 증가
+                missileEnhanceEndTime = pygame.time.get_ticks() + 5000
 
         if missileEnhanced and pygame.time.get_ticks() > missileEnhanceEndTime:
             missileEnhanced = False
 
         writePassed(gamePad, rockPassed)
-        drawObject(gamePad, rock, rockX, rockY)
+        rock.draw(gamePad)
         if rock2:
-            drawObject(gamePad, rock2['image'], rock2['x'], rock2['y'])
+            rock2.draw(gamePad)
         drawHearts(gamePad, hearts, fullHeart, emptyHeart)
 
         if rockPassed > 2:
             writeMessage(gamePad, '게임 오버!', gameOverSound)
             onGame = False
 
-        if pixel_collision(fighter, rock, x, y, rockX, rockY):
+        if pixel_collision(fighter, rock.image, x, y, rock.x, rock.y):
             hearts -= 1
             if hearts == 0:
                 gameOver(gamePad, gameOverSound)
             else:
-                rock = pygame.image.load(random.choice(rockImage))
-                rockSize = rock.get_rect().size
-                rockWidth = rockSize[0]
-                rockHeight = rockSize[1]
-                rockX = random.randrange(0, padWidth - rockWidth)
-                rockY = 0
+                rock.reset()
 
         if rock2:
-            if pixel_collision(fighter, rock2['image'], x, y, rock2['x'], rock2['y']):
+            if pixel_collision(fighter, rock2.image, x, y, rock2.x, rock2.y):
                 hearts -= 1
                 if hearts == 0:
                     gameOver(gamePad, gameOverSound)
                 else:
                     rock2 = None
-
 
         pygame.display.update()
         clock.tick(60)
