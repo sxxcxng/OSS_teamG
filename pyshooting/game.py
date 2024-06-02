@@ -53,6 +53,14 @@ def gameOver(gamePad, gameOverSound):
     pygame.quit()
     sys.exit()
 
+def pixel_collision(obj1, obj2, obj1_x, obj1_y, obj2_x, obj2_y):
+    rect1 = obj1.get_rect(left=obj1_x, top=obj1_y)
+    rect2 = obj2.get_rect(left=obj2_x, top=obj2_y)
+    intersection = rect1.clip(rect2)
+    if intersection.width == 0 or intersection.height == 0:
+        return False
+    return True
+
 def runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem):
     fighterSize = fighter.get_rect().size
     fighterWidth, fighterHeight = fighterSize
@@ -306,6 +314,27 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
         if rockPassed > 2:
             writeMessage(gamePad, '게임 오버!', gameOverSound)
             onGame = False
+
+        if pixel_collision(fighter, rock, x, y, rockX, rockY):
+            hearts -= 1
+            if hearts == 0:
+                gameOver(gamePad, gameOverSound)
+            else:
+                rock = pygame.image.load(random.choice(rockImage))
+                rockSize = rock.get_rect().size
+                rockWidth = rockSize[0]
+                rockHeight = rockSize[1]
+                rockX = random.randrange(0, padWidth - rockWidth)
+                rockY = 0
+
+        if rock2:
+            if pixel_collision(fighter, rock2['image'], x, y, rock2['x'], rock2['y']):
+                hearts -= 1
+                if hearts == 0:
+                    gameOver(gamePad, gameOverSound)
+                else:
+                    rock2 = None
+
 
         pygame.display.update()
         clock.tick(60)
