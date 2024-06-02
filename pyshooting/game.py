@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-from pyshooting.resources import padWidth, padHeight, rockImage, explosionSound
+from pyshooting.resources import padWidth, padHeight, rockImage, load_image, load_sound
 from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
 from pyshooting.messages import writeMessage
 from pyshooting.audio import loadSounds, playMusic, stopMusic
@@ -14,15 +14,16 @@ def initGame():
 
     # 모든 이미지 파일을 assets/images 폴더에서 로드
     imageDir = 'assets/images'
-    background = pygame.image.load(os.path.join(imageDir, 'background.png'))
-    fighter = pygame.image.load(os.path.join(imageDir, 'fighter.png'))
-    missile = pygame.image.load(os.path.join(imageDir, 'missile.png'))
-    explosion = pygame.image.load(os.path.join(imageDir, 'explosion.png'))
-    fullHeart = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
-    emptyHeart = pygame.image.load(os.path.join(imageDir, 'empty_heart.png'))
-    heartItem = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
-    clearItem = pygame.image.load(os.path.join(imageDir, 'clear_item.png'))
-    missileItem = pygame.image.load(os.path.join(imageDir, 'missile_item.png'))
+    background = load_image(os.path.join(imageDir, 'background.png'))
+    fighter = load_image(os.path.join(imageDir, 'fighter.png'))
+    missile = load_image(os.path.join(imageDir, 'missile.png'))
+    explosion = load_image(os.path.join(imageDir, 'explosion.png'))
+    fullHeart = load_image(os.path.join(imageDir, 'full_heart.png'))
+    emptyHeart = load_image(os.path.join(imageDir, 'empty_heart.png'))
+    heartItem = load_image(os.path.join(imageDir, 'full_heart.png'))
+    clearItem = load_image(os.path.join(imageDir, 'clear_item.png'))
+    missileItem = load_image(os.path.join(imageDir, 'missile_item.png'))
+
     clock = pygame.time.Clock()
     missileSound, gameOverSound, destroySound = loadSounds()
     playMusic(os.path.join('assets/sounds', 'music.wav'))
