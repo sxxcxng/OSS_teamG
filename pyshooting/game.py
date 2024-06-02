@@ -6,6 +6,7 @@ from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
 from pyshooting.messages import writeMessage
 from pyshooting.audio import loadSounds, playMusic, stopMusic
 import os
+import time
 
 def initGame():
     pygame.init()
@@ -107,6 +108,9 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     level = 1
     rocks_destroyed = 0
 
+    last_pause_time = time.time()
+    is_paused = False
+
     showLevelPage(gamePad, level)
 
     while onGame:
@@ -126,9 +130,20 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     missileXY.append([missileX, missileY])
                     if missileEnhanced:
                         missileXY.append([missileX - 20, missileY])
+                elif event.key == pygame.K_p:
+                    if time.time() - last_pause_time > 30:
+                        is_paused = not is_paused
+                        if is_paused:
+                            stopMusic()
+                        else:
+                            playMusic(os.path.join('assets/sounds', 'music.wav'))
+                        last_pause_time = time.time()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     fighterX = 0
+
+        if is_paused:
+            continue
 
         gamePad.blit(background, (0, 0))
         x += fighterX
