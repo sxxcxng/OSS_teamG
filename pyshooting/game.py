@@ -1,18 +1,17 @@
 import pygame
 import sys
 import random
-from pyshooting.resources import padWidth, padHeight, rock_images, explosion_sound
-from pyshooting.graphics import drawObject, writeScore, writePassed, writeLevel
-from pyshooting.messages import writeMessage
-from pyshooting.audio import loadSounds, playMusic, stopMusic
+from pyshooting.resources import padWidth, padHeight, rock_images
+from pyshooting.graphics import draw_object, write_score, write_passed, write_level
+from pyshooting.messages import write_message
+from pyshooting.audio import load_sounds, play_music, stop_music
 import os
 import time
 
 class Rock:
-    def __init__(self, image, width, height, x, y, speed, hits_needed, x_speed=0):
+    def __init__(self, image, x, y, speed, hits_needed, x_speed=0):
         self.image = pygame.image.load(image)
-        self.width = width
-        self.height = height
+        self.width, self.height = self.image.get_rect().size
         self.x = x
         self.y = y
         self.speed = speed
@@ -20,11 +19,11 @@ class Rock:
         self.hits_taken = 0
         self.x_speed = x_speed
 
-    def draw(self, gamePad):
-        drawObject(gamePad, self.image, self.x, self.y)
+    def draw(self, screen):
+        draw_object(screen, self.image, self.x, self.y)
         font = pygame.font.SysFont(None, 25)
         text = font.render(str(self.hits_needed - self.hits_taken), True, (255, 0, 0))
-        gamePad.blit(text, (self.x + self.width, self.y))
+        screen.blit(text, (self.x + self.width, self.y))
 
     def move(self):
         self.y += self.speed
@@ -34,9 +33,7 @@ class Rock:
 
     def reset(self):
         self.image = pygame.image.load(random.choice(rock_images))
-        rockSize = self.image.get_rect().size
-        self.width = rockSize[0]
-        self.height = rockSize[1]
+        self.width, self.height = self.image.get_rect().size
         self.x = random.randrange(0, padWidth - self.width)
         self.y = -self.height
         self.speed += 0.02
@@ -45,42 +42,41 @@ class Rock:
 
 def initialize_game():
     pygame.init()
-    gamePad = pygame.display.set_mode((padWidth, padHeight))
+    screen = pygame.display.set_mode((padWidth, padHeight))
     pygame.display.set_caption('PyShooting')
-    imageDir = 'assets/images'
-    background = pygame.image.load(os.path.join(imageDir, 'background.png'))
-    fighter = pygame.image.load(os.path.join(imageDir, 'fighter.png'))
-    missile = pygame.image.load(os.path.join(imageDir, 'missile.png'))
-    explosion = pygame.image.load(os.path.join(imageDir, 'explosion.png'))
-    fullHeart = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
-    emptyHeart = pygame.image.load(os.path.join(imageDir, 'empty_heart.png'))
-    heart_item = pygame.image.load(os.path.join(imageDir, 'full_heart.png'))
-    clear_item = pygame.image.load(os.path.join(imageDir, 'clear_item.png'))
-    missile_item = pygame.image.load(os.path.join(imageDir, 'missile_item.png'))
+    image_dir = 'assets/images'
+    background = pygame.image.load(os.path.join(image_dir, 'background.png'))
+    fighter = pygame.image.load(os.path.join(image_dir, 'fighter.png'))
+    missile = pygame.image.load(os.path.join(image_dir, 'missile.png'))
+    explosion = pygame.image.load(os.path.join(image_dir, 'explosion.png'))
+    full_heart = pygame.image.load(os.path.join(image_dir, 'full_heart.png'))
+    empty_heart = pygame.image.load(os.path.join(image_dir, 'empty_heart.png'))
+    heart_item = pygame.image.load(os.path.join(image_dir, 'full_heart.png'))
+    clear_item = pygame.image.load(os.path.join(image_dir, 'clear_item.png'))
+    missile_item = pygame.image.load(os.path.join(image_dir, 'missile_item.png'))
     clock = pygame.time.Clock()
-    missileSound, game_overSound, destroy_sound = loadSounds()
-    playMusic(os.path.join('assets/sounds', 'music.wav'))
-    return gamePad, background, fighter, missile, explosion, missileSound, game_overSound, clock, destroy_sound, fullHeart, emptyHeart, heart_item, clear_item, missile_item
+    missile_sound, game_over_sound, destroy_sound = load_sounds()
+    play_music(os.path.join('assets/sounds', 'music.wav'))
+    return screen, background, fighter, missile, explosion, missile_sound, game_over_sound, clock, destroy_sound, full_heart, empty_heart, heart_item, clear_item, missile_item
 
-def display_level_page(gamePad, level):
+def display_level_page(screen, level):
     font = pygame.font.Font('NanumGothic.ttf', 80)
     text = font.render(f'레벨 {level}', True, (255, 255, 255))
     textpos = text.get_rect(center=(padWidth / 2, padHeight / 2))
-    gamePad.fill((0, 0, 0))
-    gamePad.blit(text, textpos)
+    screen.fill((0, 0, 0))
+    screen.blit(text, textpos)
     pygame.display.update()
     pygame.time.delay(2000)
 
-def draw_hearts(gamePad, hearts, fullHeart, emptyHeart):
-    heart_width = fullHeart.get_rect().width
-    heart_height = fullHeart.get_rect().height
-    for i in range(3):
-        heart_img = fullHeart if i < hearts else emptyHeart
-        drawObject(gamePad, heart_img, 10 + i * (heart_width + 10), padHeight - heart_height - 10)
+def draw_hearts(screen, hearts, full_heart, empty_heart):
+    heart_width, heart_height = full_heart.get_rect().size
+    heart_images = [full_heart if i < hearts else empty_heart for i in range(3)]
+    for i, heart_img in enumerate(heart_images):
+        draw_object(screen, heart_img, 10 + i * (heart_width + 10), padHeight - heart_height - 10)
 
-def game_over(gamePad, game_overSound):
-    writeMessage(gamePad, '게임 오버!', game_overSound)
-    stopMusic()
+def game_over(screen, game_over_sound):
+    write_message(screen, '게임 오버!', game_over_sound)
+    stop_music()
     pygame.quit()
     sys.exit()
 
@@ -90,36 +86,33 @@ def check_pixel_collision(obj1, obj2, obj1_x, obj1_y, obj2_x, obj2_y):
     intersection = rect1.clip(rect2)
     return intersection.width > 0 and intersection.height > 0
 
-def run_game(gamePad, background, fighter, missile, explosion, missileSound, game_overSound, clock, destroy_sound, fullHeart, emptyHeart, heart_item, clear_item, missile_item):
-    fighterWidth, fighterHeight = fighter.get_rect().size
+def run_game(screen, background, fighter, missile, explosion, missile_sound, game_over_sound, clock, destroy_sound, full_heart, empty_heart, heart_item, clear_item, missile_item):
+    fighter_width, fighter_height = fighter.get_rect().size
     x, y = padWidth * 0.45, padHeight * 0.9
     fighter_dx, fighter_dy = 0, 0
     missiles = []
 
-    rockSpeed = random.choice([2, 3, 4])
-    rock = Rock(random.choice(rock_images), 0, 0, random.randrange(0, padWidth), 0, rockSpeed, random.randint(1, 3))
+    rock_speed = random.choice([2, 3, 4])
+    rock = Rock(random.choice(rock_images), random.randrange(0, padWidth), 0, rock_speed, random.randint(1, 3))
     rock2 = None
 
-    heart_itemX, heart_itemY, heart_itemSpeed, heart_itemAppear = random.randrange(0, padWidth), 0, 2, False
-
-    missile_itemX, missile_itemY, missile_itemSpeed, missile_itemAppear, missileEnhanced, missileEnhanceEndTime = random.randrange(0, padWidth), 0, 3, False, False, 0
-
-    clear_itemX, clear_itemY, clear_itemSpeed, clear_itemAppear = random.randrange(0, padWidth), 0, 3, False
+    heart_item_x, heart_item_y, heart_item_speed, heart_item_visible = random.randrange(0, padWidth), 0, 2, False
+    missile_item_x, missile_item_y, missile_item_speed, missile_item_visible, missile_enhanced, missile_enhance_end_time = random.randrange(0, padWidth), 0, 3, False, False, 0
+    clear_item_x, clear_item_y, clear_item_speed, clear_item_visible = random.randrange(0, padWidth), 0, 3, False
 
     hearts, rocks_destroyed_count = 3, 0
-
-    is_shot, shot_count, rocks_passed, game_running, level = False, 0, 0, True, 1
+    rocks_passed, game_running, level = 0, True, 1
 
     last_pause_time, is_paused = time.time(), False
 
-    display_level_page(gamePad, level)
+    display_level_page(screen, level)
 
     while game_running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     fighter_dx = -5
                 elif event.key == pygame.K_RIGHT:
@@ -129,19 +122,16 @@ def run_game(gamePad, background, fighter, missile, explosion, missileSound, gam
                 elif event.key == pygame.K_DOWN:
                     fighter_dy = 5
                 elif event.key == pygame.K_SPACE:
-                    missileSound.play()
-                    missiles.append([x + fighterWidth / 2, y - fighterHeight])
-                    if missileEnhanced:
-                        missiles.append([x + fighterWidth / 2 - 20, y - fighterHeight])
+                    missile_sound.play()
+                    missiles.append([x + fighter_width / 2, y - fighter_height])
+                    if missile_enhanced:
+                        missiles.append([x + fighter_width / 2 - 20, y - fighter_height])
                 elif event.key == pygame.K_p:
-                    if time.time() - last_pause_time > 0.5:  # Debounce for 0.5 seconds
+                    if time.time() - last_pause_time > 0.5:
                         is_paused = not is_paused
-                        if is_paused:
-                            stopMusic()
-                        else:
-                            playMusic(os.path.join('assets/sounds', 'music.wav'))
+                        stop_music() if is_paused else play_music(os.path.join('assets/sounds', 'music.wav'))
                         last_pause_time = time.time()
-            if event.type == pygame.KEYUP:
+            elif event.type == pygame.KEYUP:
                 if event.key in {pygame.K_LEFT, pygame.K_RIGHT}:
                     fighter_dx = 0
                 elif event.key in {pygame.K_UP, pygame.K_DOWN}:
@@ -150,33 +140,33 @@ def run_game(gamePad, background, fighter, missile, explosion, missileSound, gam
         if is_paused:
             continue
 
-        gamePad.blit(background, (0, 0))
-        x = max(0, min(x + fighter_dx, padWidth - fighterWidth))
-        y = max(0, min(y + fighter_dy, padHeight - fighterHeight))
+        screen.blit(background, (0, 0))
+        x = max(0, min(x + fighter_dx, padWidth - fighter_width))
+        y = max(0, min(y + fighter_dy, padHeight - fighter_height))
 
-        fighterRect = pygame.Rect(x, y, fighterWidth, fighterHeight)
-        rockRect = pygame.Rect(rock.x, rock.y, rock.width, rock.height)
+        fighter_rect = pygame.Rect(x, y, fighter_width, fighter_height)
+        rock_rect = pygame.Rect(rock.x, rock.y, rock.width, rock.height)
 
-        if fighterRect.colliderect(rockRect):
+        if fighter_rect.colliderect(rock_rect):
             hearts -= 1
             if hearts == 0:
-                game_over(gamePad, game_overSound)
+                game_over(screen, game_over_sound)
             else:
                 rock.reset()
 
         if rock2:
-            rock2Rect = pygame.Rect(rock2.x, rock2.y, rock2.width, rock2.height)
-            if fighterRect.colliderect(rock2Rect):
+            rock2_rect = pygame.Rect(rock2.x, rock2.y, rock2.width, rock2.height)
+            if fighter_rect.colliderect(rock2_rect):
                 hearts -= 1
                 if hearts == 0:
-                    game_over(gamePad, game_overSound)
+                    game_over(screen, game_over_sound)
                 else:
                     rock2 = None
 
-        drawObject(gamePad, fighter, x, y)
+        draw_object(screen, fighter, x, y)
 
         if rocks_passed == 3 or hearts == 0:
-            game_over(gamePad, game_overSound)
+            game_over(screen, game_over_sound)
 
         new_missiles = []
         for bx, by in missiles:
@@ -199,32 +189,31 @@ def run_game(gamePad, background, fighter, missile, explosion, missileSound, gam
 
         missiles = new_missiles
 
-
         for bx, by in missiles:
-            drawObject(gamePad, missile, bx, by)
+            draw_object(screen, missile, bx, by)
 
-        if not clear_itemAppear and random.random() < 0.007:
-            clear_itemX, clear_itemY, clear_itemAppear = random.randrange(0, padWidth - clear_item.get_rect().width), 0, True
+        if not clear_item_visible and random.random() < 0.007:
+            clear_item_x, clear_item_y, clear_item_visible = random.randrange(0, padWidth - clear_item.get_rect().width), 0, True
 
-        if clear_itemAppear:
-            clear_itemY += clear_itemSpeed
-            drawObject(gamePad, clear_item, clear_itemX, clear_itemY)
-            if clear_itemY > padHeight:
-                clear_itemAppear = False
-            if y < clear_itemY + clear_item.get_rect().height and clear_itemX < x < clear_itemX + clear_item.get_rect().width:
-                clear_itemAppear = False
+        if clear_item_visible:
+            clear_item_y += clear_item_speed
+            draw_object(screen, clear_item, clear_item_x, clear_item_y)
+            if clear_item_y > padHeight:
+                clear_item_visible = False
+            if y < clear_item_y + clear_item.get_rect().height and clear_item_x < x < clear_item_x + clear_item.get_rect().width:
+                clear_item_visible = False
                 rock.reset()
                 rock2 = None
                 rocks_passed = 0
 
         if rocks_destroyed_count >= 4 * level:
             level += 1
-            display_level_page(gamePad, level)
+            display_level_page(screen, level)
             rocks_destroyed_count = 0
             rock.speed += 0.5
 
-        writeScore(gamePad, shot_count)
-        writeLevel(gamePad, level, padWidth, padHeight)
+        write_score(screen, rocks_destroyed_count)
+        write_level(screen, level, padWidth, padHeight)
         rock.move()
         if rock.y > padHeight:
             rock.reset()
@@ -236,58 +225,51 @@ def run_game(gamePad, background, fighter, missile, explosion, missileSound, gam
                 rock2 = None
                 rocks_passed += 1
 
-        if not heart_itemAppear and random.random() < 0.007:
-            heart_itemX, heart_itemY, heart_itemAppear = random.randrange(0, padWidth - heart_item.get_rect().width), 0, True
+        if not heart_item_visible and random.random() < 0.007:
+            heart_item_x, heart_item_y, heart_item_visible = random.randrange(0, padWidth - heart_item.get_rect().width), 0, True
 
-        if heart_itemAppear:
-            heart_itemY += heart_itemSpeed
-            drawObject(gamePad, heart_item, heart_itemX, heart_itemY)
-            if heart_itemY > padHeight:
-                heart_itemAppear = False
-            if y < heart_itemY + heart_item.get_rect().height and heart_itemX < x < heart_itemX + heart_item.get_rect().width:
+        if heart_item_visible:
+            heart_item_y += heart_item_speed
+            draw_object(screen, heart_item, heart_item_x, heart_item_y)
+            if heart_item_y > padHeight:
+                heart_item_visible = False
+            if y < heart_item_y + heart_item.get_rect().height and heart_item_x < x < heart_item_x + heart_item.get_rect().width:
                 hearts = min(3, hearts + 1)
-                heart_itemAppear = False
+                heart_item_visible = False
 
-        if not missile_itemAppear and random.random() < 0.002:
-            missile_itemX, missile_itemY, missile_itemAppear = random.randrange(0, padWidth - missile_item.get_rect().width), 0, True
+        if not missile_item_visible and random.random() < 0.002:
+            missile_item_x, missile_item_y, missile_item_visible = random.randrange(0, padWidth - missile_item.get_rect().width), 0, True
 
-        if missile_itemAppear:
-            missile_itemY += missile_itemSpeed
-            drawObject(gamePad, missile_item, missile_itemX, missile_itemY)
-            if missile_itemY > padHeight:
-                missile_itemAppear = False
-            if y < missile_itemY + missile_item.get_rect().height and missile_itemX < x < missile_itemX + missile_item.get_rect().width:
-                missile_itemAppear = False
-                missileEnhanced, missileEnhanceEndTime = True, pygame.time.get_ticks() + 5000
+        if missile_item_visible:
+            missile_item_y += missile_item_speed
+            draw_object(screen, missile_item, missile_item_x, missile_item_y)
+            if missile_item_y > padHeight:
+                missile_item_visible = False
+            if y < missile_item_y + missile_item.get_rect().height and missile_item_x < x < missile_item_x + missile_item.get_rect().width:
+                missile_item_visible = False
+                missile_enhanced = True
+                missile_enhance_end_time = pygame.time.get_ticks() + 5000
 
-        if missileEnhanced and pygame.time.get_ticks() > missileEnhanceEndTime:
-            missileEnhanced = False
+        if missile_enhanced and pygame.time.get_ticks() > missile_enhance_end_time:
+            missile_enhanced = False
 
-        writePassed(gamePad, rocks_passed)
-        writeScore(gamePad, rocks_destroyed_count)  # Update the display of destroyed rocks
-        rock.draw(gamePad)
+        write_passed(screen, rocks_passed)
+        rock.draw(screen)
         if rock2:
-            rock2.draw(gamePad)
-        draw_hearts(gamePad, hearts, fullHeart, emptyHeart)
+            rock2.draw(screen)
+        draw_hearts(screen, hearts, full_heart, empty_heart)
 
         if rocks_passed > 2:
-            writeMessage(gamePad, '게임 오버!', game_overSound)
+            write_message(screen, '게임 오버!', game_over_sound)
             game_running = False
 
         if check_pixel_collision(fighter, rock.image, x, y, rock.x, rock.y):
             hearts -= 1
-            if hearts == 0:
-                game_over(gamePad, game_overSound)
-            else:
-                rock.reset()
+            game_over(screen, game_over_sound) if hearts == 0 else rock.reset()
 
-        if rock2:
-            if check_pixel_collision(fighter, rock2.image, x, y, rock2.x, rock2.y):
-                hearts -= 1
-                if hearts == 0:
-                    game_over(gamePad, game_overSound)
-                else:
-                    rock2 = None
+        if rock2 and check_pixel_collision(fighter, rock2.image, x, y, rock2.x, rock2.y):
+            hearts -= 1
+            game_over(screen, game_over_sound) if hearts == 0 else rock2.reset()
 
         pygame.display.update()
         clock.tick(60)
