@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-from pyshooting.resources import padWidth, padHeight, rock_images, explosion_sound
+from pyshooting.resources import padWidth, padHeight, rock_images
 from pyshooting.graphics import draw_object, write_score, write_passed, write_level
 from pyshooting.messages import write_message
 from pyshooting.audio import load_sounds, play_music, stop_music
