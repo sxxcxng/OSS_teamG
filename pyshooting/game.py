@@ -91,6 +91,7 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
     fighterWidth, fighterHeight = fighter.get_rect().size
     x, y = padWidth * 0.45, padHeight * 0.9
     fighterX = 0
+    fighterY = 0
     missileXY = []
 
     rockSpeed = random.choice([2, 3, 4])
@@ -121,6 +122,10 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
                     fighterX -= 5
                 elif event.key == pygame.K_RIGHT:
                     fighterX += 5
+                elif event.key == pygame.K_UP:
+                    fighterY -= 5
+                elif event.key == pygame.K_DOWN:
+                    fighterY += 5
                 elif event.key == pygame.K_SPACE:
                     missileSound.play()
                     missileX = x + fighterWidth / 2
@@ -139,16 +144,23 @@ def runGame(gamePad, background, fighter, missile, explosion, missileSound, game
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     fighterX = 0
+                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    fighterY = 0
 
         if is_paused:
             continue
 
         gamePad.blit(background, (0, 0))
         x += fighterX
+        y += fighterY
         if x < 0:
             x = 0
         elif x > padWidth - fighterWidth:
             x = padWidth - fighterWidth
+        if y < 0:
+            y = 0
+        elif y > padHeight - fighterHeight:
+            y = padHeight - fighterHeight
 
         fighterRect = pygame.Rect(x, y, fighterWidth, fighterHeight)
         rockRect = pygame.Rect(rock.x, rock.y, rock.width, rock.height)
