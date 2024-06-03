@@ -18,4 +18,3 @@ def writeLevel(gamePad, level, padWidth, padHeight):
     font = pygame.font.Font('NanumGothic.ttf', 20)
     text = font.render('레벨 :' + str(level), True, (0, 255, 0))
     gamePad.blit(text, (padWidth - 100, padHeight - 30))
-
