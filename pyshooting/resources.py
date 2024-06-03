@@ -8,26 +8,26 @@ padWidth = 480
 padHeight = 640
 
 # 이미지와 사운드가 있는 디렉토리 경로 설정
-rockImageDir = 'assets/images'
-explosionSoundDir = 'assets/sounds'
+rock_imagesDir = 'assets/images'
+explosion_soundDir = 'assets/sounds'
 
 # 운석 이미지 파일 이름을 담을 리스트
-rockImage = []
+rock_images = []
 
 # 'rock'으로 시작하는 파일 이름을 찾아 리스트에 추가
-for filename in os.listdir(rockImageDir):
+for filename in os.listdir(rock_imagesDir):
     if filename.startswith('rock') and filename.endswith('.png'):
-        rockImage.append(os.path.join(rockImageDir, filename))
+        rock_images.append(os.path.join(rock_imagesDir, filename))
 
 # 폭발 사운드 파일 이름을 담을 리스트
-explosionSound = []
+explosion_sound = []
 
 # 'explosion'으로 시작하는 파일 이름을 찾아 리스트에 추가
-for filename in os.listdir(explosionSoundDir):
+for filename in os.listdir(explosion_soundDir):
     if filename.startswith('explosion') and filename.endswith('.wav'):
-        explosionSound.append(os.path.join(explosionSoundDir, filename))
+        explosion_sound.append(os.path.join(explosion_soundDir, filename))
         
-clearItemImage = 'clear_item.png'
+clear_itemImage = 'clear_item.png'
 
 # 이미지 로드 함수
 def load_image(file_path):

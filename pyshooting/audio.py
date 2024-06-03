@@ -1,14 +1,14 @@
 import pygame
 import random
-from pyshooting.resources import explosionSound, load_sound
+from pyshooting.resources import explosion_sound, load_sound
 import os
 
 def loadSounds():
     soundDir = 'assets/sounds'
     missileSound = load_sound(os.path.join(soundDir, 'missile.wav'))
-    gameOverSound = load_sound(os.path.join(soundDir, 'gameover.wav'))
-    destroySound = load_sound(random.choice(explosionSound))
-    return missileSound, gameOverSound, destroySound
+    game_overSound = load_sound(os.path.join(soundDir, 'game_over.wav'))
+    destroy_sound = load_sound(random.choice(explosion_sound))
+    return missileSound, game_overSound, destroy_sound
 
 def playMusic(file):
     try:

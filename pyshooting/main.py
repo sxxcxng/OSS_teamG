@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 from pyshooting.resources import padWidth, padHeight
-from pyshooting.game import runGame, initGame
+from pyshooting.game import run_game, initialize_game
 import pyshooting.settingTab as settingTab
 
 def draw_start_screen(gamePad, background, start_button_rect, setting_button_rect):
@@ -42,7 +42,7 @@ def main():
     background = pygame.image.load(os.path.join(imageDir, 'background.png'))
     
     (gamePad, background, fighter, missile, explosion, missileSound, 
-     gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem) = initGame()
+     game_overSound, clock, destroy_sound, fullHeart, emptyHeart, heart_item, clear_item, missile_item) = initialize_game()
     
     start_button_rect = pygame.Rect(padWidth / 2 - 100, padHeight / 2 - 100, 200, 100)
     setting_button_rect = pygame.Rect(padWidth / 2 - 100, padHeight / 2, 200, 100)
@@ -50,7 +50,7 @@ def main():
     
     wait_for_start(gamePad, background, start_button_rect, setting_button_rect)
     
-    runGame(gamePad, background, fighter, missile, explosion, missileSound, gameOverSound, clock, destroySound, fullHeart, emptyHeart, heartItem, clearItem, missileItem)
+    run_game(gamePad, background, fighter, missile, explosion, missileSound, game_overSound, clock, destroy_sound, fullHeart, emptyHeart, heart_item, clear_item, missile_item)
 
 if __name__ == "__main__":
     main()
