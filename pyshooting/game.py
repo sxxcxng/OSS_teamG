@@ -70,8 +70,8 @@ def display_level_page(screen, level):
 
 def draw_hearts(screen, hearts, full_heart, empty_heart):
     heart_width, heart_height = full_heart.get_rect().size
-    for i in range(3):
-        heart_img = full_heart if i < hearts else empty_heart
+    heart_images = [full_heart if i < hearts else empty_heart for i in range(3)]
+    for i, heart_img in enumerate(heart_images):
         draw_object(screen, heart_img, 10 + i * (heart_width + 10), padHeight - heart_height - 10)
 
 def game_over(screen, game_over_sound):
@@ -97,9 +97,7 @@ def run_game(screen, background, fighter, missile, explosion, missile_sound, gam
     rock2 = None
 
     heart_item_x, heart_item_y, heart_item_speed, heart_item_visible = random.randrange(0, padWidth), 0, 2, False
-
     missile_item_x, missile_item_y, missile_item_speed, missile_item_visible, missile_enhanced, missile_enhance_end_time = random.randrange(0, padWidth), 0, 3, False, False, 0
-
     clear_item_x, clear_item_y, clear_item_speed, clear_item_visible = random.randrange(0, padWidth), 0, 3, False
 
     hearts, rocks_destroyed_count = 3, 0
@@ -151,11 +149,19 @@ def run_game(screen, background, fighter, missile, explosion, missile_sound, gam
 
         if fighter_rect.colliderect(rock_rect):
             hearts -= 1
-            game_over(screen, game_over_sound) if hearts == 0 else rock.reset()
+            if hearts == 0:
+                game_over(screen, game_over_sound)
+            else:
+                rock.reset()
 
-        if rock2 and fighter_rect.colliderect(pygame.Rect(rock2.x, rock2.y, rock2.width, rock2.height)):
-            hearts -= 1
-            game_over(screen, game_over_sound) if hearts == 0 else rock2.reset()
+        if rock2:
+            rock2_rect = pygame.Rect(rock2.x, rock2.y, rock2.width, rock2.height)
+            if fighter_rect.colliderect(rock2_rect):
+                hearts -= 1
+                if hearts == 0:
+                    game_over(screen, game_over_sound)
+                else:
+                    rock2 = None
 
         draw_object(screen, fighter, x, y)
 
