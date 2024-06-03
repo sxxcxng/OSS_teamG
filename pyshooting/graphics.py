@@ -1,20 +1,20 @@
 import pygame
 
-def drawObject(gamePad, obj, x, y):
-    gamePad.blit(obj, (x, y))
+def draw_object(screen, obj, x, y):
+    screen.blit(obj, (x, y))
 
-def writeScore(gamePad, count):
+def write_score(screen, count):
     font = pygame.font.Font('NanumGothic.ttf', 20)
-    pygame.draw.rect(gamePad, (0, 0, 0), (10, 0, 200, 30))  # 기존 텍스트 영역 지우기
-    text = font.render('파괴한 운석 수:' + str(count), True, (255, 255, 255))
-    gamePad.blit(text, (10, 0))
+    pygame.draw.rect(screen, (0, 0, 0), (10, 0, 200, 30))  # 기존 텍스트 영역 지우기
+    text = font.render(f'파괴한 운석 수: {count}', True, (255, 255, 255))
+    screen.blit(text, (10, 0))
 
-def writePassed(gamePad, count):
+def write_passed(screen, count):
     font = pygame.font.Font('NanumGothic.ttf', 20)
-    text = font.render('놓친 운석 :' + str(count), True, (255, 0, 0))
-    gamePad.blit(text, (360, 0))
+    text = font.render(f'놓친 운석: {count}', True, (255, 0, 0))
+    screen.blit(text, (360, 0))
 
-def writeLevel(gamePad, level, padWidth, padHeight):
+def write_level(screen, level, pad_width, pad_height):
     font = pygame.font.Font('NanumGothic.ttf', 20)
-    text = font.render('레벨 :' + str(level), True, (0, 255, 0))
-    gamePad.blit(text, (padWidth - 100, padHeight - 30))
+    text = font.render(f'레벨: {level}', True, (0, 255, 0))
+    screen.blit(text, (pad_width - 100, pad_height - 30))

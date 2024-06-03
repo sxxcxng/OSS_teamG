@@ -1,7 +1,7 @@
 import pygame
 import sys
 from pyshooting.resources import padWidth, padHeight
-from pyshooting.audio import playMusic, stopMusic, isMusicPlaying
+from pyshooting.audio import play_music, stop_music, is_music_playing
 import os
 
 def draw_settings_screen(screen):
@@ -16,7 +16,7 @@ def draw_settings_screen(screen):
     save_rect = save_text.get_rect(center=(padWidth / 2, padHeight / 2 + 150))
     screen.blit(save_text, save_rect)
     
-    music_status = "배경음 ON" if isMusicPlaying() else "배경음 OFF"
+    music_status = "배경음 ON" if is_music_playing() else "배경음 OFF"
     music_text = font.render(music_status, True, (255, 255, 255))
     music_rect = music_text.get_rect(center=(padWidth / 2, padHeight / 2))
     screen.blit(music_text, music_rect)
@@ -33,7 +33,7 @@ def handle_events(back_button, music_button, screen):
             if back_button.collidepoint(mouse_x, mouse_y):
                 return False
             elif music_button.collidepoint(mouse_x, mouse_y):
-                playMusic(os.path.join('assets/sounds', 'music.wav')) if not isMusicPlaying() else stopMusic()
+                play_music(os.path.join('assets/sounds', 'music.wav')) if not is_music_playing() else stop_music()
                 draw_settings_screen(screen)
     return True
 
